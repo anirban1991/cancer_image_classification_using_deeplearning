@@ -43,7 +43,9 @@ class_mapping = {"No cancer": 0, "Glioma": 1, "Meningioma": 2, "Pituitary": 3, "
                  "Leukemia": 6}
 
 loader = DataLoader((224, 224))
-# X_train, y_train, X_valid, y_valid, X_test, y_test = loader.load_data()
+X_train, y_train, X_valid, y_valid, X_test, y_test = loader.load_data()
+
+confusion = False
 
 model_name = "Baseline"
 
@@ -225,3 +227,31 @@ else:
     plt.legend()
     plt.grid()
     plt.show()
+
+    
+    ## Plotting the confusion matrix
+    if confusion:
+        model.eval()
+        y_true_test, y_pred_test = [], []
+            
+        with torch.no_grad():
+            for images, labels in test_loader:
+                images, labels = images.to(device), labels.to(device)
+                        
+                if model_name == "ensemble":
+                        outputs = model(images)
+                else:
+                        outputs, features = model(images)
+            
+                _, predicted = torch.max(outputs, 1)
+                y_true_test.extend(labels.cpu().numpy())
+                y_pred_test.extend(predicted.cpu().numpy())
+        
+        # Compute confusion matrix
+        cm = confusion_matrix(y_true_test, y_pred_test)
+        plt.figure(figsize=(6, 6))
+        sns.heatmap(cm, annot=True, fmt="d", cmap="viridis", xticklabels=range(7), yticklabels=range(7))
+        plt.xlabel("Predicted Label")
+        plt.ylabel("True Label")
+        plt.title("Confusion Matrix")
+        plt.show()
