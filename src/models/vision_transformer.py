@@ -34,6 +34,8 @@ class Vit:
             push_to_hub=False,
             report_to='tensorboard',
             load_best_model_at_end=True,
+            lr_scheduler_type="cosine", 
+            warmup_ratio=0.1
         )
 
         def collate_fn(batch):
